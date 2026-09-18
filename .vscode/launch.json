@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run Connected Bank Website",
+            "request": "launch",
+            "mainClass": "bankmanagement.Main",
+            "vmArgs": "--add-modules=jdk.httpserver"
+        }
+    ]
+}

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VaultBank — Bank Management System</title>
+  <style>
+    :root { --navy:#082f49; --navy-2:#0b4665; --sky:#e8f5fb; --mint:#dff8ec; --green:#0c8c5a; --ink:#132237; --muted:#687689; --line:#e6edf3; --paper:#fff; --orange:#f79f1f; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color:var(--ink); background:#f5f8fb; }
+    button,input,select { font:inherit; }
+    .app { min-height:100vh; display:grid; grid-template-columns:250px 1fr; }
+    aside { color:#dfeff6; background:linear-gradient(160deg,var(--navy),#061c34); padding:28px 18px; display:flex; flex-direction:column; }
+    .brand { display:flex; align-items:center; gap:10px; font-size:21px; font-weight:800; letter-spacing:-.6px; color:white; padding:0 10px 28px; }
+    .brand-mark { width:33px; height:33px; border-radius:10px; background:linear-gradient(135deg,#46d9b7,#2e9ae8); display:grid; place-items:center; color:#07324c; font-weight:900; }
+    .tag { margin:4px 10px 10px; font-size:11px; letter-spacing:1.2px; color:#82a9bb; text-transform:uppercase; }
+    .nav { display:grid; gap:5px; }
+    .nav button { display:flex; gap:12px; align-items:center; width:100%; border:0; border-radius:10px; background:transparent; color:#c4d9e3; padding:12px; text-align:left; cursor:pointer; transition:.2s; }
+    .nav button:hover,.nav button.active { background:rgba(255,255,255,.12); color:#fff; }
+    .nav .icon { width:21px; text-align:center; }
+    .support { margin-top:auto; padding:18px 12px 0; border-top:1px solid rgba(255,255,255,.12); font-size:13px; color:#9cb9c7; line-height:1.6; }
+    .support b { color:white; }
+    main { padding:28px clamp(20px,4vw,58px); max-width:1500px; width:100%; margin:auto; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:32px; }
+    .hello h1 { margin:0; font-size:28px; letter-spacing:-1px; }
+    .hello p { color:var(--muted); margin:6px 0 0; }
+    .user { display:flex; align-items:center; gap:11px; background:white; padding:7px 12px 7px 8px; border:1px solid var(--line); border-radius:14px; }
+    .avatar { width:35px; height:35px; border-radius:50%; background:#e1f4ec; color:var(--green); font-weight:800; display:grid; place-items:center; }
+    .user small { display:block; color:var(--muted); margin-top:2px; }
+    .page { display:none; animation:up .35s ease; }
+    .page.active { display:block; }
+    @keyframes up { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:none; } }
+    .balance-card { background:linear-gradient(120deg,#0a486a,#116f80); color:white; padding:30px; border-radius:22px; position:relative; overflow:hidden; min-height:190px; box-shadow:0 18px 40px rgba(8,47,73,.16); }
+    .balance-card:after { content:""; position:absolute; width:260px; height:260px; border:42px solid rgba(255,255,255,.08); border-radius:50%; right:-60px; top:-150px; }
+    .balance-card:before { content:""; position:absolute; width:120px; height:120px; background:rgba(76,222,184,.13); border-radius:50%; right:150px; bottom:-60px; }
+    .balance-card > * { position:relative; z-index:1; }
+    .eyebrow { text-transform:uppercase; letter-spacing:1.4px; font-size:11px; font-weight:700; opacity:.75; }
+    .balance { font-size:42px; font-weight:800; letter-spacing:-1.5px; margin:12px 0; }
+    .account-meta { display:flex; justify-content:space-between; max-width:500px; color:#cce5ed; font-size:14px; }
+    .grid { display:grid; gap:18px; }
+    .stats { grid-template-columns:repeat(3,1fr); margin:22px 0 28px; }
+    .card { background:var(--paper); border:1px solid var(--line); border-radius:17px; padding:20px; }
+    .stat { display:flex; gap:13px; align-items:center; }
+    .stat-icon { width:43px; height:43px; border-radius:13px; display:grid; place-items:center; font-size:20px; }
+    .stat b { display:block; margin-top:3px; font-size:20px; letter-spacing:-.5px; }
+    .stat span { display:block; color:var(--muted); font-size:13px; }
+    .blue { background:#e5f4fc; } .green { background:#e3f9ef; } .gold { background:#fff3d9; }
+    .section-title { display:flex; justify-content:space-between; align-items:center; gap:15px; margin:0 0 14px; }
+    .section-title h2 { margin:0; font-size:18px; letter-spacing:-.4px; }
+    .link { color:var(--green); border:0; background:transparent; font-weight:700; cursor:pointer; }
+    .dashboard-lower { grid-template-columns:1.3fr .7fr; }
+    .transactions { padding:0; overflow:hidden; }
+    .transactions .section-title { padding:20px 20px 10px; }
+    .tx { display:grid; grid-template-columns:auto 1fr auto; gap:13px; align-items:center; padding:14px 20px; border-top:1px solid var(--line); }
+    .tx-badge { height:37px; width:37px; border-radius:11px; display:grid; place-items:center; font-weight:bold; }
+    .in { background:#e4faef; color:#098557; } .out { background:#fff0ed; color:#d85347; }
+    .tx b { display:block; font-size:14px; }.tx small { color:var(--muted); }.tx strong { font-size:14px; }.tx strong.out-amount { color:#c14b40; }.tx strong.in-amount { color:#078656; }
+    .quick { display:grid; gap:10px; }
+    .quick button { padding:14px; text-align:left; border:1px solid var(--line); border-radius:12px; background:white; color:var(--ink); cursor:pointer; font-weight:700; transition:.2s; }
+    .quick button:hover { border-color:#5dc7ae; transform:translateX(2px); }
+    .quick i { color:var(--green); font-style:normal; margin-right:8px; }
+    .page-head { margin-bottom:22px; }.page-head h2 { margin:0 0 6px; font-size:26px; letter-spacing:-.8px; }.page-head p { margin:0; color:var(--muted); }
+    .action-layout { grid-template-columns:1fr .85fr; align-items:start; }
+    .form-card { padding:28px; }.form-card h3 { margin:0 0 20px; }.field { display:grid; gap:7px; margin:0 0 16px; }.field label { color:#49576a; font-size:13px; font-weight:700; }.field input,.field select { width:100%; padding:12px 13px; border:1px solid #dbe5ed; border-radius:10px; outline:none; background:#fbfdff; }.field input:focus,.field select:focus { border-color:#21a47c; box-shadow:0 0 0 3px #dff8ec; }
+    .button { border:0; border-radius:10px; padding:13px 17px; font-weight:800; cursor:pointer; color:white; background:var(--green); box-shadow:0 8px 16px rgba(12,140,90,.18); }.button:hover { background:#087549; }.button.secondary { background:var(--navy-2); }
+    .hint { background:var(--sky); border-radius:16px; padding:24px; color:#215168; line-height:1.65; }.hint h3 { margin:0 0 8px; color:var(--navy); }.hint ul { padding-left:18px; margin:9px 0; }
+    .history-table { width:100%; border-collapse:collapse; text-align:left; background:white; border:1px solid var(--line); border-radius:16px; overflow:hidden; }.history-table th { background:#f4f8fb; color:#69788a; text-transform:uppercase; letter-spacing:.7px; font-size:11px; }.history-table th,.history-table td { padding:15px 17px; border-bottom:1px solid var(--line); }.history-table tr:last-child td { border:0; }.pill { display:inline-block; padding:5px 9px; border-radius:20px; background:#e3f9ef; color:#087c50; font-size:11px; font-weight:800; }.pill.out-pill { background:#fff0ed; color:#c44d41; }
+    .notice { position:fixed; right:25px; bottom:25px; background:#103a54; color:white; padding:14px 18px; border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.18); transform:translateY(100px); opacity:0; transition:.3s; }.notice.show { transform:none; opacity:1; }
+    .profile { display:flex; gap:16px; align-items:center; margin-bottom:18px; }.profile .avatar { width:58px; height:58px; font-size:20px; }.profile h3 { margin:0 0 4px; }.profile p { margin:0; color:var(--muted); }
+    .login-layer { position:fixed; inset:0; z-index:10; display:grid; place-items:center; padding:20px; background:linear-gradient(135deg,rgba(4,25,44,.94),rgba(7,78,94,.88)); }.login-box { width:min(440px,100%); background:white; border-radius:22px; padding:34px; box-shadow:0 24px 70px rgba(0,0,0,.25); }.login-box .brand { color:var(--navy); padding:0 0 18px; justify-content:center; }.login-box h2 { text-align:center; margin:0 0 6px; }.login-box p { text-align:center; color:var(--muted); margin:0 0 22px; }.login-box .button { width:100%; }.login-create { width:100%; border:0; background:transparent; color:var(--green); font-weight:800; cursor:pointer; margin-top:15px; }
+    @media (max-width:850px) { .app { grid-template-columns:1fr; } aside { padding:15px; position:sticky; top:0; z-index:3; flex-direction:row; align-items:center; overflow:auto; } .brand { padding:0 20px 0 0; white-space:nowrap; } .tag,.support { display:none; }.nav { display:flex; }.nav button { white-space:nowrap; padding:9px 10px; }.nav button .icon { display:none; } main { padding:24px 20px; }.stats,.dashboard-lower,.action-layout { grid-template-columns:1fr; } }
+    @media (max-width:560px) { .topbar { align-items:flex-start; }.user { display:none; }.stats { grid-template-columns:1fr; }.balance { font-size:34px; }.account-meta { gap:10px; flex-direction:column; }.history-table { font-size:12px; }.history-table th,.history-table td { padding:11px 8px; }.history-table th:nth-child(1),.history-table td:nth-child(1) { display:none; } }
+  </style>
+</head>
+<body>
+  <div class="login-layer" id="login-layer">
+    <form class="login-box" id="login-form">
+      <div class="brand"><span class="brand-mark">V</span>VaultBank</div>
+      <h2>Welcome back</h2><p>Sign in to manage your account.</p>
+      <div class="field"><label for="login-account">Account number</label><input id="login-account" placeholder="e.g. SB10001" required></div>
+      <div class="field"><label for="login-pin">PIN</label><input id="login-pin" type="password" placeholder="Enter your PIN" required></div>
+      <button class="button" type="submit">Login securely</button>
+      <button class="login-create" id="show-create" type="button">Create a new account</button>
+    </form>
+  </div>
+  <div class="app">
+    <aside>
+      <div class="brand"><span class="brand-mark">V</span>VaultBank</div>
+      <div class="tag">Main menu</div>
+      <nav class="nav" aria-label="Banking navigation">
+        <button class="active" data-page="dashboard"><span class="icon">▦</span>Dashboard</button>
+        <button data-page="balance"><span class="icon">◉</span>Balance enquiry</button>
+        <button data-page="deposit"><span class="icon">↓</span>Deposit money</button>
+        <button data-page="withdraw"><span class="icon">↑</span>Withdraw money</button>
+        <button data-page="transfer"><span class="icon">↔</span>Transfer money</button>
+        <button data-page="history"><span class="icon">☷</span>Transaction history</button>
+        <button data-page="create"><span class="icon">＋</span>Create account</button>
+        <button id="logout-button"><span class="icon">↪</span>Logout</button>
+      </nav>
+      <div class="support"><b>Need help?</b><br>Our banking support is available 24/7.</div>
+    </aside>
+    <main>
+      <div class="topbar"><div class="hello"><h1 id="page-title">Good morning, Rahul</h1><p id="page-subtitle">Here is your financial overview.</p></div><div class="user"><div class="avatar">RS</div><div><b>Rahul Sharma</b><small>SB10001 · Savings</small></div></div></div>
+
+      <section class="page active" id="dashboard">
+        <div class="balance-card"><div class="eyebrow">Available balance</div><div class="balance" id="main-balance">₹0.00</div><div class="account-meta"><span id="main-account">Savings account</span><span>Updated just now</span></div></div>
+        <div class="grid stats"><div class="card stat"><div class="stat-icon blue">↓</div><div><span>Money in</span><b id="money-in">₹0.00</b></div></div><div class="card stat"><div class="stat-icon gold">↑</div><div><span>Money out</span><b id="money-out">₹0.00</b></div></div><div class="card stat"><div class="stat-icon green">✓</div><div><span>Account status</span><b>Active</b></div></div></div>
+        <div class="grid dashboard-lower"><div class="card transactions"><div class="section-title"><h2>Recent transactions</h2><button class="link" data-go="history">View all</button></div><div id="recent-transactions"></div></div><div class="card"><div class="section-title"><h2>Quick actions</h2></div><div class="quick"><button data-go="deposit"><i>↓</i>Add money</button><button data-go="withdraw"><i>↑</i>Withdraw money</button><button data-go="transfer"><i>↔</i>Make a transfer</button><button data-go="balance"><i>◉</i>Check balance</button></div></div></div>
+      </section>
+
+      <section class="page" id="balance"><div class="page-head"><h2>Balance enquiry</h2><p>Your real-time account balance at a glance.</p></div><div class="balance-card"><div class="eyebrow" id="balance-account">Account</div><div class="balance" id="balance-value">₹0.00</div><div class="account-meta"><span>Available to use</span><span>Account active ✓</span></div></div></section>
+      <section class="page" id="deposit"><div class="page-head"><h2>Deposit money</h2><p>Add funds safely to your savings account.</p></div><div class="grid action-layout"><form class="card form-card" id="deposit-form"><h3>Deposit details</h3><div class="field"><label for="deposit-amount">Amount</label><input id="deposit-amount" type="number" min="1" placeholder="Enter amount in ₹" required></div><div class="field"><label for="deposit-note">Description (optional)</label><input id="deposit-note" placeholder="e.g. Monthly savings"></div><button class="button" type="submit">Deposit securely</button></form><div class="hint"><h3>Good to know</h3><ul><li>Enter a positive amount.</li><li>Your updated balance appears immediately.</li><li>The deposit is recorded in transaction history.</li></ul></div></div></section>
+      <section class="page" id="withdraw"><div class="page-head"><h2>Withdraw money</h2><p>Withdraw funds while keeping your balance secure.</p></div><div class="grid action-layout"><form class="card form-card" id="withdraw-form"><h3>Withdrawal details</h3><div class="field"><label for="withdraw-amount">Amount</label><input id="withdraw-amount" type="number" min="1" placeholder="Enter amount in ₹" required></div><div class="field"><label for="withdraw-note">Description (optional)</label><input id="withdraw-note" placeholder="e.g. Cash withdrawal"></div><button class="button secondary" type="submit">Withdraw securely</button></form><div class="hint"><h3>Available balance</h3><p id="withdraw-hint">₹0.00 available to withdraw.</p><ul><li>Enter a positive amount.</li><li>Savings accounts cannot go below zero.</li><li>Each withdrawal is saved in history.</li></ul></div></div></section>
+      <section class="page" id="transfer"><div class="page-head"><h2>Transfer money</h2><p>Move money between VaultBank accounts.</p></div><div class="grid action-layout"><form class="card form-card" id="transfer-form"><h3>Transfer details</h3><div class="field"><label for="recipient">Recipient account number</label><input id="recipient" placeholder="e.g. CA10001" required></div><div class="field"><label for="transfer-amount">Amount</label><input id="transfer-amount" type="number" min="1" placeholder="Enter amount in ₹" required></div><div class="field"><label for="transfer-note">Note</label><input id="transfer-note" placeholder="Optional note"></div><button class="button secondary" type="submit">Review transfer</button></form><div class="hint"><h3>Transfer protection</h3><ul><li>Confirm the account number before sending.</li><li>Transfers cannot be cancelled after confirmation.</li><li>You will receive an instant transaction record.</li></ul></div></div></section>
+      <section class="page" id="history"><div class="page-head"><h2>Transaction history</h2><p>A clear record of every movement in your account.</p></div><div class="table-wrap"><table class="history-table"><thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Amount</th><th>Balance after</th></tr></thead><tbody id="history-body"><tr><td>18 Sep 2026</td><td>Cash deposit</td><td><span class="pill">Deposit</span></td><td class="in-amount">+ ₹2,000.00</td><td>₹13,000.00</td></tr><tr><td>17 Sep 2026</td><td>Transfer to CA10001</td><td><span class="pill out-pill">Transfer</span></td><td class="out-amount">− ₹1,000.00</td><td>₹11,000.00</td></tr><tr><td>12 Sep 2026</td><td>Cash deposit</td><td><span class="pill">Deposit</span></td><td class="in-amount">+ ₹5,000.00</td><td>₹12,000.00</td></tr><tr><td>10 Sep 2026</td><td>Cash withdrawal</td><td><span class="pill out-pill">Withdraw</span></td><td class="out-amount">− ₹3,000.00</td><td>₹7,000.00</td></tr></tbody></table></div></section>
+      <section class="page" id="create"><div class="page-head"><h2>Create a new account</h2><p>Open a simple savings or current account in a few steps.</p></div><div class="grid action-layout"><form class="card form-card" id="create-form"><h3>Customer details</h3><div class="field"><label for="new-name">Full name</label><input id="new-name" placeholder="Enter customer name" required></div><div class="field"><label for="new-account">Account number</label><input id="new-account" placeholder="e.g. SB10002" required></div><div class="field"><label for="new-pin">PIN</label><input id="new-pin" type="password" minlength="4" placeholder="Choose a 4-digit PIN" required></div><div class="field"><label for="account-type">Account type</label><select id="account-type"><option>Savings account</option><option>Current account</option></select></div><div class="field"><label for="opening">Opening balance</label><input id="opening" type="number" min="0" placeholder="Enter amount in ₹" required></div><button class="button" type="submit">Create account</button></form><div class="hint"><h3>Account benefits</h3><ul><li>Savings accounts earn 4% annual interest.</li><li>Current accounts include a ₹10,000 overdraft limit.</li><li>Your account starts active and ready to use.</li></ul></div></div></section>
+    </main>
+  </div>
+  <div class="notice" id="notice" aria-live="polite"></div>
+  <script>
+    const storageKey = 'vaultbank-demo-data-v2';
+    const seed = { accounts: [
+      {name:'Rahul Sharma', account:'SB10001', pin:'1234', type:'Savings', balance:13000, transactions:[
+        {type:'DEPOSIT', amount:2000, note:'Cash deposit', date:'18 Sep 2026'}, {type:'TRANSFER_OUT', amount:1000, note:'Transfer to CA10001', date:'17 Sep 2026'}, {type:'DEPOSIT', amount:5000, note:'Cash deposit', date:'12 Sep 2026'}, {type:'WITHDRAW', amount:3000, note:'Cash withdrawal', date:'10 Sep 2026'}]},
+      {name:'Rahul Sharma', account:'CA10001', pin:'5678', type:'Current', balance:18000, transactions:[]}
+    ]};
+    let data = JSON.parse(localStorage.getItem(storageKey)) || seed;
+    let current = null;
+    const pages = document.querySelectorAll('.page');
+    const navButtons = document.querySelectorAll('.nav button[data-page]');
+    const titles = {dashboard:['Good morning','Here is your financial overview.'],balance:['Balance enquiry','Your real-time funds are shown below.'],deposit:['Deposit money','Add funds to your account in a few seconds.'],withdraw:['Withdraw money','Withdraw securely from your account.'],transfer:['Transfer money','Send money securely between accounts.'],history:['Transaction history','Review every recorded transaction.'],create:['Create a new account','Open an account with essential details.']};
+    const money = value => '₹' + Number(value).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const save = () => localStorage.setItem(storageKey,JSON.stringify(data));
+    async function api(path, body) {
+      const response = await fetch(path, body ? {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)} : undefined);
+      return response.json();
+    }
+    const notice = document.getElementById('notice');
+    function showNotice(message){ notice.textContent=message; notice.classList.add('show'); setTimeout(()=>notice.classList.remove('show'),3200); }
+    function go(page) { pages.forEach(p=>p.classList.toggle('active',p.id===page)); navButtons.forEach(b=>b.classList.toggle('active',b.dataset.page===page)); document.getElementById('page-title').textContent=page==='dashboard' ? titles.dashboard[0]+', '+current.name.split(' ')[0] : titles[page][0]; document.getElementById('page-subtitle').textContent=titles[page][1]; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+    navButtons.forEach(button=>button.addEventListener('click',()=>go(button.dataset.page)));
+    document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>go(button.dataset.go)));
+    function addTransaction(account,type,amount,note){ account.transactions.unshift({type,amount,note,date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),balanceAfter:account.balance}); }
+    async function refresh(){ if(!current) return; const account=await api('/api/account?account='+encodeURIComponent(current.account)); if(!account.ok){showNotice('Could not load your account.');return;} current=account; const history=await api('/api/transactions?account='+encodeURIComponent(current.account)); current.transactions=history.transactions||[]; render(); }
+    function render(){ if(!current) return; const incoming=current.transactions.filter(t=>t.type==='DEPOSIT'||t.type==='TRANSFER_IN').reduce((sum,t)=>sum+t.amount,0); const outgoing=current.transactions.filter(t=>t.type==='WITHDRAW'||t.type==='TRANSFER_OUT').reduce((sum,t)=>sum+t.amount,0); document.getElementById('main-balance').textContent=money(current.balance); document.getElementById('main-account').textContent=current.type+' account · '+current.account; document.getElementById('balance-account').textContent=current.type+' account · '+current.account; document.getElementById('balance-value').textContent=money(current.balance); document.getElementById('withdraw-hint').textContent=money(current.balance)+' available to withdraw.'; document.getElementById('money-in').textContent=money(incoming); document.getElementById('money-out').textContent=money(outgoing); const initials=current.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); document.querySelector('.user').innerHTML='<div class="avatar">'+initials+'</div><div><b>'+current.name+'</b><small>'+current.account+' · '+current.type+'</small></div>'; const recent=document.getElementById('recent-transactions'); recent.innerHTML=current.transactions.slice(0,3).map(t=>{const inbound=t.type==='DEPOSIT'||t.type==='TRANSFER_IN'; return '<div class="tx"><div class="tx-badge '+(inbound?'in':'out')+'">'+(inbound?'↓':'↑')+'</div><div><b>'+t.note+'</b><small>'+t.date+'</small></div><strong class="'+(inbound?'in-amount':'out-amount')+'">'+(inbound?'+ ':'− ')+money(t.amount)+'</strong></div>';}).join('') || '<div class="tx"><div><b>No transactions yet</b><small>Your activity will appear here.</small></div></div>'; document.getElementById('history-body').innerHTML=current.transactions.map(t=>{const inbound=t.type==='DEPOSIT'||t.type==='TRANSFER_IN'; const label=t.type.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase()); return '<tr><td>'+t.date+'</td><td>'+t.note+'</td><td><span class="pill '+(inbound?'':'out-pill')+'">'+label+'</span></td><td class="'+(inbound?'in-amount':'out-amount')+'">'+(inbound?'+ ':'− ')+money(t.amount)+'</td><td>'+money(t.balanceAfter)+'</td></tr>';}).join(''); }
+    document.getElementById('login-form').addEventListener('submit',async event=>{ event.preventDefault(); const account=document.getElementById('login-account').value.trim().toUpperCase(); const pin=document.getElementById('login-pin').value; const result=await api('/api/login',{account,pin}); if(!result.ok){showNotice('Invalid account number or PIN.'); return;} current=result; current.transactions=[]; document.getElementById('login-layer').style.display='none'; go('dashboard'); await refresh(); });
+    document.getElementById('show-create').addEventListener('click',()=>{document.getElementById('login-layer').style.display='none';go('create');});
+    document.getElementById('logout-button').addEventListener('click',()=>{current=null;document.getElementById('login-form').reset();document.getElementById('login-layer').style.display='grid';showNotice('You have been logged out.');});
+    document.getElementById('deposit-form').addEventListener('submit',async event=>{event.preventDefault();const amount=Number(document.getElementById('deposit-amount').value);const result=await api('/api/deposit',{account:current.account,amount:String(amount)});if(!result.ok){showNotice('Deposit failed. Enter a valid positive amount.');return;}event.target.reset();await refresh();showNotice(money(amount)+' deposited successfully.');});
+    document.getElementById('withdraw-form').addEventListener('submit',async event=>{event.preventDefault();const amount=Number(document.getElementById('withdraw-amount').value);const result=await api('/api/withdraw',{account:current.account,amount:String(amount)});if(!result.ok){showNotice('Withdrawal failed: check the amount and available balance.');return;}event.target.reset();await refresh();showNotice(money(amount)+' withdrawn successfully.');});
+    document.getElementById('transfer-form').addEventListener('submit',async event=>{event.preventDefault();const receiver=document.getElementById('recipient').value.trim().toUpperCase();const amount=Number(document.getElementById('transfer-amount').value);const result=await api('/api/transfer',{sender:current.account,receiver,amount:String(amount)});if(!result.ok){showNotice('Transfer failed: check the account number and available balance.');return;}event.target.reset();await refresh();showNotice(money(amount)+' transferred successfully.');});
+    document.getElementById('create-form').addEventListener('submit',async event=>{event.preventDefault();const name=document.getElementById('new-name').value.trim();const account=document.getElementById('new-account').value.trim().toUpperCase();const pin=document.getElementById('new-pin').value;const type=document.getElementById('account-type').value.split(' ')[0];const balance=Number(document.getElementById('opening').value);const result=await api('/api/create',{name,account,pin,type,balance:String(balance)});if(!result.ok){showNotice('Account could not be created. Use a new account number and valid details.');return;}event.target.reset();document.getElementById('login-layer').style.display='grid';showNotice('Account created. Please log in with your new account number and PIN.');});
+  </script>
+</body>
+</html>
